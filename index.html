@@ -7,200 +7,171 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0d0f14; --surface: #161a24; --surface2: #1e2433;
-      --border: #2a3045;
-      --green: #00e676; --green-dim: #0d2e1c;
-      --red: #ff5252;   --red-dim: #2e0d0d;
-      --yellow: #ffd740; --blue: #40c4ff;
-      --text: #e8eaf6;  --text-dim: #78849e;
-      --mono: 'JetBrains Mono', monospace;
-      --ko:   'Noto Sans KR', sans-serif;
+      --bg:#0d0f14; --surface:#161a24; --surface2:#1e2433;
+      --border:#2a3045;
+      --green:#00e676; --green-dim:#0d2e1c;
+      --red:#ff5252;   --red-dim:#2e0d0d;
+      --yellow:#ffd740; --blue:#40c4ff; --blue-dim:#0d1f2e;
+      --text:#e8eaf6;  --text-dim:#78849e;
+      --mono:'JetBrains Mono',monospace;
+      --ko:'Noto Sans KR',sans-serif;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: var(--ko); min-height: 100vh; padding: 32px 24px; }
-    .wrap { max-width: 1280px; margin: 0 auto; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:var(--ko);min-height:100vh;padding:32px 24px;}
+    .wrap{max-width:1280px;margin:0 auto;}
 
     /* 헤더 */
-    .hd {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 28px; padding-bottom: 22px; border-bottom: 1px solid var(--border);
-    }
-    .hd-left { display: flex; align-items: center; gap: 14px; }
-    .hd-icon { width: 46px; height: 46px; background: var(--green); border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-    .hd h1  { font-size: 20px; font-weight: 900; letter-spacing: -.5px; }
-    .hd p   { color: var(--text-dim); font-size: 12px; margin-top: 4px; }
+    .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid var(--border);}
+    .hd-left{display:flex;align-items:center;gap:14px;}
+    .hd-icon{width:46px;height:46px;background:var(--green);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+    .hd h1{font-size:20px;font-weight:900;letter-spacing:-.5px;}
+    .hd p{color:var(--text-dim);font-size:12px;margin-top:4px;}
+    .hd-btns{display:flex;align-items:center;gap:10px;}
 
-    /* 설정 버튼 */
-    .settings-btn {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--surface2); border: 1px solid var(--border);
-      color: var(--text-dim); border-radius: 9px; padding: 10px 16px;
-      font-size: 13px; font-family: var(--ko); cursor: pointer; transition: all .2s;
-    }
-    .settings-btn:hover { border-color: var(--green); color: var(--green); }
-    .api-status { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 2px; }
-    .api-ok   { background: var(--green); box-shadow: 0 0 6px var(--green); }
-    .api-none { background: var(--red); }
+    /* 공통 버튼 */
+    .icon-btn{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);border-radius:9px;padding:10px 16px;font-size:13px;font-family:var(--ko);cursor:pointer;transition:all .2s;}
+    .icon-btn:hover{border-color:var(--green);color:var(--green);}
+    .icon-btn.blue:hover{border-color:var(--blue);color:var(--blue);}
+    .api-status{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:2px;}
+    .api-ok{background:var(--green);box-shadow:0 0 6px var(--green);}
+    .api-none{background:var(--red);}
 
-    /* 모달 */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.7); z-index: 100;
-      align-items: center; justify-content: center;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; padding: 32px; width: 480px; max-width: 95vw;
-    }
-    .modal h2 { font-size: 17px; font-weight: 900; margin-bottom: 6px; }
-    .modal p  { color: var(--text-dim); font-size: 12px; margin-bottom: 24px; line-height: 1.6; }
-    .modal-field { margin-bottom: 16px; }
-    .modal-field label { display: block; font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
-    .modal-input {
-      width: 100%; background: var(--surface2); border: 1.5px solid var(--border);
-      border-radius: 8px; padding: 11px 14px; color: var(--text);
-      font-family: var(--mono); font-size: 13px; outline: none; transition: border-color .2s;
-    }
-    .modal-input:focus { border-color: var(--green); }
-    .modal-btns { display: flex; gap: 10px; margin-top: 24px; }
-    .modal-save {
-      flex: 1; background: var(--green); color: #000; border: none;
-      border-radius: 8px; padding: 12px; font-weight: 700;
-      font-size: 14px; font-family: var(--ko); cursor: pointer;
-    }
-    .modal-save:hover { opacity: .85; }
-    .modal-cancel {
-      background: var(--surface2); color: var(--text-dim);
-      border: 1px solid var(--border); border-radius: 8px;
-      padding: 12px 20px; font-size: 14px; font-family: var(--ko); cursor: pointer;
-    }
-    .modal-cancel:hover { border-color: var(--text-dim); }
-    .save-msg { display:none; color: var(--green); font-size: 12px; margin-top: 10px; text-align: center; }
+    /* 탭 */
+    .tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);}
+    .tab-btn{padding:10px 22px;font-size:13px;font-weight:700;font-family:var(--ko);background:none;border:none;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
+    .tab-btn:hover{color:var(--text);}
+    .tab-btn.active{color:var(--green);border-bottom-color:var(--green);}
+    .tab-content{display:none;}
+    .tab-content.active{display:block;}
+
+    /* 모달 공통 */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+    .modal h2{font-size:17px;font-weight:900;margin-bottom:8px;}
+    .modal-close{float:right;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;}
+    .modal-close:hover{color:var(--text);}
+    .modal-field{margin-bottom:16px;}
+    .modal-field label{display:block;font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+    .modal-input{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color .2s;}
+    .modal-input:focus{border-color:var(--green);}
+    .modal-btns{display:flex;gap:10px;margin-top:24px;}
+    .modal-save{flex:1;background:var(--green);color:#000;border:none;border-radius:8px;padding:12px;font-weight:700;font-size:14px;font-family:var(--ko);cursor:pointer;}
+    .modal-save:hover{opacity:.85;}
+    .modal-cancel{background:var(--surface2);color:var(--text-dim);border:1px solid var(--border);border-radius:8px;padding:12px 20px;font-size:14px;font-family:var(--ko);cursor:pointer;}
+    .save-msg{display:none;color:var(--green);font-size:12px;margin-top:10px;text-align:center;}
+
+    /* 발급 안내 모달 전용 */
+    .guide-step{display:flex;gap:14px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+    .guide-step:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+    .guide-num{width:28px;height:28px;border-radius:50%;background:var(--green);color:#000;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+    .guide-body h4{font-size:14px;font-weight:700;margin-bottom:4px;}
+    .guide-body p{color:#8ec8f0;font-size:12px;line-height:1.7;}
+    .guide-body p strong{color:var(--blue);}
+    .guide-link{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:var(--blue-dim);border:1px solid #1a4a6e;color:var(--blue);border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;text-decoration:none;transition:all .2s;}
+    .guide-link:hover{background:#102a40;border-color:var(--blue);}
+    .guide-tip{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-top:14px;font-size:11px;color:var(--text-dim);line-height:1.7;}
+    .guide-tip strong{color:var(--yellow);}
 
     /* 폼 */
-    .form { display: flex; gap: 10px; margin-bottom: 16px; }
-    .inp {
-      flex: 1; background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: 10px; padding: 13px 18px; color: var(--text);
-      font-size: 15px; font-family: var(--ko); outline: none; transition: border-color .2s;
-    }
-    .inp:focus { border-color: var(--green); }
-    .inp::placeholder { color: var(--text-dim); }
-    .btn {
-      background: var(--green); color: #000; border: none;
-      border-radius: 10px; padding: 13px 28px; font-weight: 700;
-      font-size: 15px; font-family: var(--ko); cursor: pointer;
-    }
-    .btn:hover { opacity: .85; }
-    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .inp{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:13px 18px;color:var(--text);font-size:15px;font-family:var(--ko);outline:none;transition:border-color .2s;width:100%;}
+    .inp:focus{border-color:var(--green);}
+    .inp::placeholder{color:var(--text-dim);}
+    .btn{background:var(--green);color:#000;border:none;border-radius:10px;padding:13px 28px;font-weight:700;font-size:15px;font-family:var(--ko);cursor:pointer;}
+    .btn:hover{opacity:.85;}
+    .btn:disabled{opacity:.4;cursor:not-allowed;}
 
     /* 안내 배너 */
-    .notice-banner {
-      display: flex; align-items: flex-start; gap: 12px;
-      background: #0d1f2e; border: 1px solid #1a4a6e;
-      border-left: 4px solid var(--blue);
-      border-radius: 10px; padding: 14px 18px;
-      margin-bottom: 20px; font-size: 13px; line-height: 1.7;
-    }
-    .notice-banner .nb-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-    .notice-banner .nb-title { color: var(--blue); font-weight: 700; font-size: 13px; margin-bottom: 2px; }
-    .notice-banner .nb-body  { color: #8ec8f0; font-size: 12px; }
-    .notice-banner .nb-body strong { color: var(--blue); }
+    .notice-banner{display:flex;align-items:flex-start;gap:12px;background:var(--blue-dim);border:1px solid #1a4a6e;border-left:4px solid var(--blue);border-radius:10px;padding:14px 18px;margin-bottom:20px;line-height:1.7;}
+    .nb-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+    .nb-title{color:var(--blue);font-weight:700;font-size:13px;margin-bottom:2px;}
+    .nb-body{color:#8ec8f0;font-size:12px;}
+    .nb-body strong{color:var(--blue);}
 
-    /* 통계 카드 */
-    .stats { display: flex; gap: 14px; margin-bottom: 22px; }
-    .sc { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; }
-    .sc-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .8px; }
-    .sc-val   { font-size: 28px; font-weight: 900; margin-top: 4px; font-family: var(--mono); }
-    .c-blue  { color: var(--blue); }
-    .c-green { color: var(--green); }
-    .c-red   { color: var(--red); }
-    .c-yellow{ color: var(--yellow); }
+    /* 통계 */
+    .stats{display:flex;gap:14px;margin-bottom:22px;}
+    .sc{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;}
+    .sc-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;}
+    .sc-val{font-size:28px;font-weight:900;margin-top:4px;font-family:var(--mono);}
+    .c-blue{color:var(--blue);}.c-green{color:var(--green);}.c-red{color:var(--red);}.c-yellow{color:var(--yellow);}
 
-    /* 그리드 */
-    .grid { display: grid; grid-template-columns: 360px 1fr; gap: 18px; }
-    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-
-    /* 패널 */
-    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 13px; overflow: hidden; }
-    .ph {
-      padding: 12px 18px; border-bottom: 1px solid var(--border);
-      font-size: 11px; font-weight: 700; letter-spacing: 1px;
-      color: var(--text-dim); text-transform: uppercase;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .dot { width: 8px; height: 8px; border-radius: 50%; }
-    .dg { background: var(--green); }
-    .db { background: var(--blue); }
+    /* 그리드/패널 */
+    .grid{display:grid;grid-template-columns:360px 1fr;gap:18px;}
+    @media(max-width:900px){.grid{grid-template-columns:1fr;}}
+    .panel{background:var(--surface);border:1px solid var(--border);border-radius:13px;overflow:hidden;}
+    .ph{padding:12px 18px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+    .dot{width:8px;height:8px;border-radius:50%;}
+    .dg{background:var(--green);}.db{background:var(--blue);}
 
     /* 콘솔 */
-    .console {
-      background: #06080d; font-family: var(--mono); font-size: 11.5px;
-      line-height: 1.8; height: 520px; overflow-y: auto; padding: 14px 18px;
-    }
-    .console::-webkit-scrollbar { width: 3px; }
-    .console::-webkit-scrollbar-thumb { background: var(--border); }
-    .ll      { color: var(--green); }
-    .ll.warn { color: var(--yellow); }
-    .ll.err  { color: var(--red); }
-    .ll.sep  { color: #283040; }
-    .lempty  { color: #283040; font-style: italic; }
+    .console{background:#06080d;font-family:var(--mono);font-size:11.5px;line-height:1.8;height:520px;overflow-y:auto;padding:14px 18px;}
+    .console::-webkit-scrollbar{width:3px;}
+    .console::-webkit-scrollbar-thumb{background:var(--border);}
+    .ll{color:var(--green);}.ll.err{color:var(--red);}.ll.sep{color:#283040;}
+    .lempty{color:#283040;font-style:italic;}
 
     /* 테이블 */
-    .rs { height: 520px; overflow-y: auto; }
-    .rs::-webkit-scrollbar { width: 3px; }
-    .rs::-webkit-scrollbar-thumb { background: var(--border); }
-    table { width: 100%; border-collapse: collapse; }
-    thead th {
-      padding: 11px 14px; text-align: left; font-size: 10px;
-      font-weight: 700; letter-spacing: .8px; color: var(--text-dim);
-      text-transform: uppercase; background: var(--surface2);
-      position: sticky; top: 0; z-index: 1;
-    }
-    tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
-    tbody tr:hover { background: var(--surface2); }
-    td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
-    .tn { color: var(--text-dim); font-family: var(--mono); font-size: 10px; width: 36px; }
-    .td-date { color: var(--text-dim); font-family: var(--mono); font-size: 11px; white-space: nowrap; }
-    .tt a {
-      color: var(--text); text-decoration: none; font-weight: 500;
-      display: block; white-space: nowrap; overflow: hidden;
-      text-overflow: ellipsis; max-width: 380px;
-    }
-    .tt a:hover { color: var(--green); }
+    .rs{height:520px;overflow-y:auto;}
+    .rs::-webkit-scrollbar{width:3px;}
+    .rs::-webkit-scrollbar-thumb{background:var(--border);}
+    table{width:100%;border-collapse:collapse;}
+    thead th{padding:11px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--text-dim);text-transform:uppercase;background:var(--surface2);position:sticky;top:0;z-index:1;}
+    tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+    tbody tr:hover{background:var(--surface2);}
+    td{padding:11px 14px;font-size:13px;vertical-align:middle;}
+    .tn{color:var(--text-dim);font-family:var(--mono);font-size:10px;width:36px;}
+    .td-date{color:var(--text-dim);font-family:var(--mono);font-size:11px;white-space:nowrap;}
+    .tt a{color:var(--text);text-decoration:none;font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:360px;}
+    .tt a:hover{color:var(--green);}
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;}
+    .bok{background:var(--green-dim);color:var(--green);}
+    .bmiss{background:var(--red-dim);color:var(--red);}
+    .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--text-dim);font-size:13px;gap:8px;}
 
-    /* 배지 */
-    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 5px; font-size: 11px; font-weight: 700; }
-    .bok   { background: var(--green-dim); color: var(--green); }
-    .bmiss { background: var(--red-dim);   color: var(--red);   }
+    /* 키워드 탭 */
+    .kw-form{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;}
+    .kw-textarea{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:13px 18px;color:var(--text);font-size:14px;font-family:var(--ko);outline:none;transition:border-color .2s;resize:vertical;min-height:110px;line-height:1.9;}
+    .kw-textarea:focus{border-color:var(--green);}
+    .kw-textarea::placeholder{color:var(--text-dim);}
+    .kw-hint{color:var(--text-dim);font-size:11px;margin-top:-4px;}
 
-    .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: var(--text-dim); font-size: 13px; gap: 8px; }
+    /* 키워드 결과 카드 */
+    .kw-results{display:flex;flex-direction:column;gap:16px;}
+    .kw-card{background:var(--surface);border:1px solid var(--border);border-radius:13px;overflow:hidden;}
+    .kw-card-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--surface2);border-bottom:1px solid var(--border);}
+    .kw-card-title{font-size:15px;font-weight:700;}
+    .kw-card-sub{font-size:11px;color:var(--text-dim);margin-top:3px;}
+    .kw-rank{font-size:24px;font-weight:900;font-family:var(--mono);}
+    .kw-rank.found{color:var(--green);}
+    .kw-rank.not-found{color:var(--red);font-size:13px;font-weight:700;}
+    .kw-card-body{padding:16px 20px;}
+    .kw-my-result{padding:10px 14px;border-radius:8px;margin-bottom:14px;border-left:3px solid;}
+    .kw-my-result.found{background:var(--green-dim);border-color:var(--green);}
+    .kw-my-result.not-found{background:var(--red-dim);border-color:var(--red);}
+    .kw-my-label{font-size:11px;font-weight:700;margin-bottom:4px;}
+    .kw-my-label.found{color:var(--green);}
+    .kw-my-label.not-found{color:var(--red);}
+    .kw-my-post-title a{color:var(--text);text-decoration:none;font-size:13px;}
+    .kw-my-post-title a:hover{color:var(--green);}
+    .kw-top-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+    .kw-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+    .kw-item:last-child{border-bottom:none;}
+    .kw-item-num{color:var(--text-dim);font-family:var(--mono);font-size:11px;width:30px;flex-shrink:0;}
+    .kw-item-info{flex:1;min-width:0;}
+    .kw-item-info a{color:var(--text);text-decoration:none;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:600px;}
+    .kw-item-info a:hover{color:var(--blue);}
+    .kw-item-blogger{color:var(--text-dim);font-size:11px;margin-top:2px;}
+    .kw-mine-tag{background:var(--green-dim);color:var(--green);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;flex-shrink:0;}
 
-    /* 로딩 오버레이 */
-    #loading-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(13,15,20,.88); z-index: 200;
-      flex-direction: column; align-items: center; justify-content: center; gap: 22px;
-    }
-    #loading-overlay.show { display: flex; }
-    .ld-dots { display: flex; gap: 10px; }
-    .ld-dots span {
-      width: 12px; height: 12px; border-radius: 50%;
-      background: var(--green);
-      animation: ld-bounce 1.2s infinite ease-in-out;
-    }
-    .ld-dots span:nth-child(1) { animation-delay: 0s; }
-    .ld-dots span:nth-child(2) { animation-delay: .2s; }
-    .ld-dots span:nth-child(3) { animation-delay: .4s; }
-    .ld-dots span:nth-child(4) { animation-delay: .6s; }
-    .ld-dots span:nth-child(5) { animation-delay: .8s; }
-    @keyframes ld-bounce {
-      0%, 80%, 100% { transform: scale(0.5); opacity: .3; }
-      40%            { transform: scale(1.2); opacity: 1;  }
-    }
-    .ld-text { color: var(--text); font-size: 15px; font-weight: 700; letter-spacing: -.3px; }
-    .ld-sub  { color: var(--text-dim); font-size: 12px; margin-top: -10px; }
+    /* 로딩 */
+    #loading-overlay{display:none;position:fixed;inset:0;background:rgba(13,15,20,.88);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:22px;}
+    #loading-overlay.show{display:flex;}
+    .ld-dots{display:flex;gap:10px;}
+    .ld-dots span{width:12px;height:12px;border-radius:50%;background:var(--green);animation:ld-bounce 1.2s infinite ease-in-out;}
+    .ld-dots span:nth-child(1){animation-delay:0s}.ld-dots span:nth-child(2){animation-delay:.2s}.ld-dots span:nth-child(3){animation-delay:.4s}.ld-dots span:nth-child(4){animation-delay:.6s}.ld-dots span:nth-child(5){animation-delay:.8s}
+    @keyframes ld-bounce{0%,80%,100%{transform:scale(.5);opacity:.3}40%{transform:scale(1.2);opacity:1}}
+    .ld-text{color:var(--text);font-size:15px;font-weight:700;}
+    .ld-sub{color:var(--text-dim);font-size:12px;margin-top:-10px;}
   </style>
 </head>
 <body>
@@ -212,85 +183,161 @@
       <div class="hd-icon">🔎</div>
       <div>
         <h1>블로그뷰 노출 분석기</h1>
-        <p>네이버 검색 API로 블로그뷰 노출 여부를 빠르게 확인합니다</p>
+        <p>네이버 검색 API로 블로그뷰 노출 여부와 키워드 순위를 확인합니다</p>
       </div>
     </div>
-    <button class="settings-btn" onclick="openModal()">
-      <span class="api-status" id="apiDot"></span>
-      ⚙️ API 설정
-      <span id="apiStatusLabel" style="font-size:11px"></span>
-    </button>
-  </div>
-
-  <!-- 검색 폼 -->
-  <div class="form">
-    <input id="blogIdInput" class="inp" placeholder="네이버 블로그 아이디 입력 (예: brain_1018)">
-    <button class="btn" id="analyzeBtn" onclick="startAnalysis()">분석 시작</button>
-  </div>
-
-  <!-- 안내 배너 -->
-  <div class="notice-banner">
-    <div class="nb-icon">ℹ️</div>
-    <div>
-      <div class="nb-title">노출 / 누락 판단 기준 안내</div>
-      <div class="nb-body">
-        포스팅 제목으로 네이버 블로그 검색 시 <strong>상위 100위 이내</strong>에 해당 포스팅이 존재하면 <strong>✓ 노출</strong>,
-        100위 밖이거나 검색되지 않으면 <strong>✗ 누락</strong>으로 표시됩니다.<br>
-        검색 API 기준이므로 실제 블로그뷰 노출과 다소 차이가 있을 수 있습니다.
-      </div>
+    <div class="hd-btns">
+      <button class="icon-btn blue" onclick="openGuideModal()">
+        📋 API 발급 안내
+      </button>
+      <button class="icon-btn" onclick="openApiModal()">
+        <span class="api-status" id="apiDot"></span>⚙️ API 설정
+        <span id="apiStatusLabel" style="font-size:11px"></span>
+      </button>
     </div>
   </div>
 
-  <!-- 통계 카드 -->
-  <div class="stats" id="statsArea" style="display:none">
-    <div class="sc"><div class="sc-label">전체 포스팅</div><div class="sc-val c-blue" id="statTotal">0</div></div>
-    <div class="sc"><div class="sc-label">블로그뷰 노출</div><div class="sc-val c-green" id="statExposed">0</div></div>
-    <div class="sc"><div class="sc-label">누락</div><div class="sc-val c-red" id="statMissed">0</div></div>
-    <div class="sc"><div class="sc-label">노출률</div><div class="sc-val c-yellow" id="statRate">0%</div></div>
+  <!-- 탭 -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-analyze',this)">📊 블로그 노출 분석</button>
+    <button class="tab-btn" onclick="switchTab('tab-keyword',this)">🔑 키워드 순위 확인</button>
   </div>
 
-  <!-- 2컬럼 -->
-  <div class="grid">
-    <!-- 로그 -->
-    <div class="panel">
-      <div class="ph"><span class="dot dg"></span>처리 로그</div>
-      <div class="console" id="console">
-        <div class="lempty">아이디를 입력하고 분석을 시작하세요.</div>
+  <!-- ══ 탭1: 노출 분석 ══ -->
+  <div id="tab-analyze" class="tab-content active">
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <input id="blogIdInput" class="inp" placeholder="네이버 블로그 아이디 입력 (예: brain_1018)" style="flex:1">
+      <button class="btn" id="analyzeBtn" onclick="startAnalysis()">분석 시작</button>
+    </div>
+
+    <div class="notice-banner">
+      <div class="nb-icon">ℹ️</div>
+      <div>
+        <div class="nb-title">노출 / 누락 판단 기준 안내</div>
+        <div class="nb-body">포스팅 제목으로 네이버 블로그 검색 시 <strong>상위 100위 이내</strong>에 존재하면 <strong>✓ 노출</strong>, 없으면 <strong>✗ 누락</strong>으로 표시됩니다. 검색 API 기준이므로 실제 블로그뷰와 다소 차이가 있을 수 있습니다.</div>
       </div>
     </div>
 
-    <!-- 결과 테이블 -->
-    <div class="panel">
-      <div class="ph"><span class="dot db"></span>분석 결과 (<span id="resultCount">0</span>개)</div>
-      <div class="rs" id="resultArea">
-        <div class="empty">
-          <span style="font-size:32px">📭</span>
-          <span id="emptyMsg">먼저 ⚙️ API 설정을 완료하세요</span>
+    <div class="stats" id="statsArea" style="display:none">
+      <div class="sc"><div class="sc-label">전체 포스팅</div><div class="sc-val c-blue" id="statTotal">0</div></div>
+      <div class="sc"><div class="sc-label">블로그뷰 노출</div><div class="sc-val c-green" id="statExposed">0</div></div>
+      <div class="sc"><div class="sc-label">누락</div><div class="sc-val c-red" id="statMissed">0</div></div>
+      <div class="sc"><div class="sc-label">노출률</div><div class="sc-val c-yellow" id="statRate">0%</div></div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="ph"><span class="dot dg"></span>처리 로그</div>
+        <div class="console" id="console"><div class="lempty">아이디를 입력하고 분석을 시작하세요.</div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="dot db"></span>분석 결과 (<span id="resultCount">0</span>개)</div>
+        <div class="rs" id="resultArea">
+          <div class="empty"><span style="font-size:32px">📭</span><span id="emptyMsg">먼저 ⚙️ API 설정을 완료하세요</span></div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- 로딩 오버레이 -->
-<div id="loading-overlay">
-  <div class="ld-dots">
-    <span></span><span></span><span></span><span></span><span></span>
+  <!-- ══ 탭2: 키워드 순위 ══ -->
+  <div id="tab-keyword" class="tab-content">
+    <div class="kw-form">
+      <input id="kwBlogIdInput" class="inp" placeholder="내 네이버 블로그 아이디 (예: brain_1018)">
+      <div>
+        <textarea id="kwInput" class="kw-textarea" placeholder="확인할 키워드를 한 줄에 하나씩 입력하세요&#10;예)&#10;강남 맛집&#10;제주도 여행 코스&#10;다이어트 식단"></textarea>
+        <div class="kw-hint">💡 여러 개 입력 시 한 번에 모두 확인합니다 (최대 20개)</div>
+      </div>
+      <button class="btn" id="kwBtn" onclick="startKeywordCheck()">순위 확인 시작</button>
+    </div>
+
+    <div class="notice-banner">
+      <div class="nb-icon">🔑</div>
+      <div>
+        <div class="nb-title">키워드 순위 확인 안내</div>
+        <div class="nb-body">입력한 키워드로 네이버 블로그를 검색하여 <strong>내 블로그 글이 몇 위</strong>에 있는지 확인합니다. <strong>상위 100위</strong>까지 탐색하며, 상위 5개 검색 결과도 함께 표시됩니다.</div>
+      </div>
+    </div>
+
+    <div id="kwResults" class="kw-results"></div>
   </div>
-  <div class="ld-text">분석 중입니다...</div>
-  <div class="ld-sub">포스팅 수에 따라 다소 시간이 걸릴 수 있습니다</div>
+
+</div><!-- /wrap -->
+
+<!-- 로딩 -->
+<div id="loading-overlay">
+  <div class="ld-dots"><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="ld-text" id="ldText">분석 중입니다...</div>
+  <div class="ld-sub" id="ldSub">잠시만 기다려주세요</div>
 </div>
 
-<!-- 설정 모달 -->
-<div class="modal-overlay" id="modal">
+<!-- ══ API 발급 안내 모달 ══ -->
+<div class="modal-overlay" id="guideModal">
   <div class="modal">
+    <button class="modal-close" onclick="closeGuideModal()">✕</button>
+    <h2 style="margin-bottom:18px;">📋 네이버 API 발급 안내</h2>
+
+    <div class="guide-step">
+      <div class="guide-num">1</div>
+      <div class="guide-body">
+        <h4>네이버 개발자 센터 접속</h4>
+        <p>아래 링크로 네이버 개발자 센터에 접속합니다.<br>네이버 계정으로 로그인이 필요합니다.</p>
+        <a class="guide-link" href="https://developers.naver.com/main/" target="_blank">🔗 developers.naver.com 바로가기</a>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="guide-num">2</div>
+      <div class="guide-body">
+        <h4>애플리케이션 등록</h4>
+        <p>상단 메뉴 <strong>Application → 애플리케이션 등록</strong> 클릭<br>
+        애플리케이션 이름은 아무거나 입력해도 됩니다. (예: 블로그분석기)</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="guide-num">3</div>
+      <div class="guide-body">
+        <h4>사용 API 선택</h4>
+        <p>사용 API 목록에서 <strong>검색</strong> 을 선택합니다.<br>
+        환경은 <strong>WEB</strong> 선택 후 서비스 URL에<br>
+        <strong>https://본인아이디.github.io</strong> 를 입력합니다.</p>
+        <a class="guide-link" href="https://developers.naver.com/apps/#/register" target="_blank">🔗 애플리케이션 등록 바로가기</a>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="guide-num">4</div>
+      <div class="guide-body">
+        <h4>Client ID / Client Secret 확인</h4>
+        <p>등록 완료 후 <strong>내 애플리케이션</strong> 페이지에서<br>
+        <strong>Client ID</strong> 와 <strong>Client Secret</strong> 을 확인할 수 있습니다.<br>
+        복사 후 이 사이트의 <strong>⚙️ API 설정</strong>에 붙여넣기 하세요.</p>
+        <a class="guide-link" href="https://developers.naver.com/apps/#/list" target="_blank">🔗 내 애플리케이션 목록 바로가기</a>
+      </div>
+    </div>
+
+    <div class="guide-tip">
+      💡 <strong>참고사항</strong><br>
+      • 네이버 검색 API는 <strong>하루 25,000건</strong> 무료로 제공됩니다.<br>
+      • API 키는 본인 브라우저에만 저장되며 외부로 전송되지 않습니다.<br>
+      • 등록 후 바로 사용 가능합니다. (심사 불필요)
+    </div>
+
+    <div style="margin-top:20px;text-align:center;">
+      <button class="btn" onclick="closeGuideModal();openApiModal();" style="width:100%;">✅ 발급 완료 → API 키 입력하러 가기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ API 설정 모달 ══ -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeApiModal()">✕</button>
     <h2>⚙️ 네이버 API 설정</h2>
-    <p>
-      네이버 개발자 센터에서 발급받은 API 키를 입력하세요.<br>
-      한 번 저장하면 브라우저를 닫아도 유지됩니다.<br>
-      <a href="https://developers.naver.com/apps" target="_blank" style="color:var(--blue);font-size:11px">
-        👉 https://developers.naver.com/apps
-      </a>
+    <p style="color:var(--text-dim);font-size:12px;margin:8px 0 24px;line-height:1.6;">
+      발급받은 API 키를 입력하세요. 한 번 저장하면 브라우저를 닫아도 유지됩니다.<br>
+      <span style="color:var(--text-dim);font-size:11px;">※ API 키가 없으신가요?</span>
+      <button onclick="closeApiModal();openGuideModal();" style="background:none;border:none;color:var(--blue);font-size:11px;cursor:pointer;text-decoration:underline;">발급 안내 보기 →</button>
     </p>
     <div class="modal-field">
       <label>Client ID</label>
@@ -302,134 +349,118 @@
     </div>
     <div class="modal-btns">
       <button class="modal-save" onclick="saveConfig()">💾 저장</button>
-      <button class="modal-cancel" onclick="closeModal()">취소</button>
+      <button class="modal-cancel" onclick="closeApiModal()">취소</button>
     </div>
     <div class="save-msg" id="saveMsg">✅ 저장 완료! API 키가 브라우저에 안전하게 저장되었습니다.</div>
   </div>
 </div>
 
 <script>
-  // ── 설정 ──────────────────────────────────────
   const PROXY = 'https://billowing-fog-1eed.woodpano.workers.dev';
 
-  // ── localStorage API 키 ───────────────────────
+  // 탭
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // API 키
   function getConfig() {
-    return {
-      clientId:     localStorage.getItem('naver_client_id')     || '',
-      clientSecret: localStorage.getItem('naver_client_secret') || '',
-    };
+    return { clientId: localStorage.getItem('naver_client_id')||'', clientSecret: localStorage.getItem('naver_client_secret')||'' };
   }
   function updateApiStatus() {
-    const { clientId, clientSecret } = getConfig();
+    const {clientId, clientSecret} = getConfig();
     const ok = !!(clientId && clientSecret);
-    const dot   = document.getElementById('apiDot');
-    const label = document.getElementById('apiStatusLabel');
-    const emptyMsg = document.getElementById('emptyMsg');
-    dot.className   = 'api-status ' + (ok ? 'api-ok' : 'api-none');
-    label.textContent = ok ? '저장됨' : '미설정';
-    label.style.color = ok ? 'var(--green)' : 'var(--red)';
-    emptyMsg.textContent = ok ? '분석 결과가 없습니다' : '먼저 ⚙️ API 설정을 완료하세요';
+    document.getElementById('apiDot').className = 'api-status ' + (ok ? 'api-ok' : 'api-none');
+    const lbl = document.getElementById('apiStatusLabel');
+    lbl.textContent = ok ? '저장됨' : '미설정';
+    lbl.style.color = ok ? 'var(--green)' : 'var(--red)';
+    document.getElementById('emptyMsg').textContent = ok ? '분석 결과가 없습니다' : '먼저 ⚙️ API 설정을 완료하세요';
     if (clientId) document.getElementById('clientId').value = clientId;
     if (clientSecret) document.getElementById('clientSecret').value = clientSecret;
   }
   updateApiStatus();
 
-  // ── 모달 ──────────────────────────────────────
-  function openModal()  { document.getElementById('modal').classList.add('open'); }
-  function closeModal() { document.getElementById('modal').classList.remove('open'); }
-  document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+  // 발급 안내 모달
+  function openGuideModal()  { document.getElementById('guideModal').classList.add('open'); }
+  function closeGuideModal() { document.getElementById('guideModal').classList.remove('open'); }
+  document.getElementById('guideModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeGuideModal(); });
+
+  // API 설정 모달
+  function openApiModal()  { document.getElementById('apiModal').classList.add('open'); }
+  function closeApiModal() { document.getElementById('apiModal').classList.remove('open'); }
+  document.getElementById('apiModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeApiModal(); });
 
   function saveConfig() {
-    const id     = document.getElementById('clientId').value.trim();
+    const id = document.getElementById('clientId').value.trim();
     const secret = document.getElementById('clientSecret').value.trim();
-    if (!id || !secret) { alert('Client ID와 Client Secret을 모두 입력해주세요.'); return; }
+    if (!id||!secret) { alert('Client ID와 Client Secret을 모두 입력해주세요.'); return; }
     localStorage.setItem('naver_client_id', id);
     localStorage.setItem('naver_client_secret', secret);
     document.getElementById('saveMsg').style.display = 'block';
-    setTimeout(() => { closeModal(); document.getElementById('saveMsg').style.display = 'none'; updateApiStatus(); }, 1200);
+    setTimeout(() => { closeApiModal(); document.getElementById('saveMsg').style.display='none'; updateApiStatus(); }, 1200);
   }
 
-  // ── 로그 ──────────────────────────────────────
-  let logs = [];
-  function writeLog(msg, type = '') {
-    logs.push({ msg, type });
+  // 로딩
+  function showLoading(text, sub) {
+    document.getElementById('ldText').textContent = text || '분석 중입니다...';
+    document.getElementById('ldSub').textContent  = sub  || '잠시만 기다려주세요';
+    document.getElementById('loading-overlay').classList.add('show');
+  }
+  function hideLoading() { document.getElementById('loading-overlay').classList.remove('show'); }
+
+  // 로그
+  let logCount = 0;
+  function writeLog(msg, type='') {
+    logCount++;
     const con = document.getElementById('console');
     const div = document.createElement('div');
-    div.className = 'll' + (type ? ' ' + type : '');
+    div.className = 'll' + (type ? ' '+type : '');
     div.textContent = '>>> ' + msg;
-    if (logs.length === 1) con.innerHTML = '';
+    if (logCount === 1) con.innerHTML = '';
     con.appendChild(div);
     con.scrollTop = con.scrollHeight;
   }
-  function clearLog() {
-    logs = [];
-    document.getElementById('console').innerHTML = '';
+  function clearLog() { logCount=0; document.getElementById('console').innerHTML=''; }
+
+  // 공통 검색
+  async function searchBlog(query, clientId, clientSecret) {
+    const res = await fetch(`${PROXY}/search?query=${encodeURIComponent(query)}`, {
+      headers: {'X-Client-Id': clientId, 'X-Client-Secret': clientSecret}
+    });
+    if (!res.ok) return [];
+    return (await res.json()).items || [];
   }
 
-  // ── RSS 파싱 ──────────────────────────────────
+  // RSS
   async function fetchRSS(blogId) {
-    const res  = await fetch(`${PROXY}/rss?blog_id=${blogId}`);
-    const text = await res.text();
-    const parser = new DOMParser();
-    const xml    = parser.parseFromString(text, 'application/xml');
-    const items  = xml.querySelectorAll('item');
-    const posts  = [];
-    items.forEach(item => {
+    const res = await fetch(`${PROXY}/rss?blog_id=${blogId}`);
+    const xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
+    const posts = [];
+    xml.querySelectorAll('item').forEach(item => {
       const title   = item.querySelector('title')?.textContent?.trim() || '';
       const link    = item.querySelector('link')?.textContent?.trim() || '';
       const pubDate = item.querySelector('pubDate')?.textContent?.trim() || '';
-
       let logNo = '';
-      if (link.includes('logNo=')) {
-        logNo = link.split('logNo=')[1].split('&')[0];
-      } else {
-        const parts = link.replace(/\/$/, '').split('/');
-        logNo = parts[parts.length - 1].split('?')[0];
-      }
-
+      if (link.includes('logNo=')) logNo = link.split('logNo=')[1].split('&')[0];
+      else { const p = link.replace(/\/$/,'').split('/'); logNo = p[p.length-1].split('?')[0]; }
       let dateStr = '';
-      if (pubDate) {
-        try {
-          const d = new Date(pubDate);
-          dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
-        } catch { dateStr = pubDate.slice(0,10); }
-      }
-
-      if (title && link) posts.push({ title, url: link, logNo, pubDate: dateStr, status: '확인 중' });
+      try { const d = new Date(pubDate); if (!isNaN(d)) dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`; } catch {}
+      if (title && link) posts.push({title, url:link, logNo, pubDate:dateStr});
     });
     return posts;
   }
 
-  // ── 검색 API ─────────────────────────────────
-  async function checkExposure(post, blogId, clientId, clientSecret) {
-    const keyword = post.title.slice(0, 30);
-    const res = await fetch(`${PROXY}/search?query=${encodeURIComponent(keyword)}`, {
-      headers: {
-        'X-Client-Id':     clientId,
-        'X-Client-Secret': clientSecret,
-      }
-    });
-    if (!res.ok) return false;
-    const data  = await res.json();
-    const items = data.items || [];
-    for (const item of items) {
-      const link = item.link || '';
-      if (link.toLowerCase().includes(blogId.toLowerCase())) return true;
-      if (post.logNo && link.includes(post.logNo)) return true;
-    }
-    return false;
-  }
-
-  // ── 분석 메인 ────────────────────────────────
+  // ══ 탭1: 노출 분석 ══
   async function startAnalysis() {
     const blogId = document.getElementById('blogIdInput').value.trim();
     if (!blogId) { alert('블로그 아이디를 입력하세요.'); return; }
+    const {clientId, clientSecret} = getConfig();
+    if (!clientId||!clientSecret) { alert('먼저 ⚙️ API 설정을 완료하세요.'); openApiModal(); return; }
 
-    const { clientId, clientSecret } = getConfig();
-    if (!clientId || !clientSecret) { alert('먼저 ⚙️ API 설정을 완료하세요.'); openModal(); return; }
-
-    // 로딩 시작
-    document.getElementById('loading-overlay').classList.add('show');
+    showLoading('블로그 포스팅 분석 중...', '포스팅 수에 따라 다소 시간이 걸릴 수 있습니다');
     document.getElementById('analyzeBtn').disabled = true;
     document.getElementById('statsArea').style.display = 'none';
     document.getElementById('resultArea').innerHTML = '';
@@ -440,25 +471,15 @@
       writeLog('='.repeat(42), 'sep');
       writeLog(`  블로그 분석 시작: '${blogId}'`);
       writeLog('='.repeat(42), 'sep');
-      writeLog(`[RSS] 접속 중 → https://rss.blog.naver.com/${blogId}.xml`);
+      writeLog(`[RSS] 접속 중 → rss.blog.naver.com/${blogId}.xml`);
 
       const posts = await fetchRSS(blogId);
       writeLog(`[RSS] 총 ${posts.length}개 포스팅 발견`);
+      if (!posts.length) { writeLog('❌ 포스팅 목록을 가져오지 못했습니다.', 'err'); hideLoading(); document.getElementById('analyzeBtn').disabled=false; return; }
 
-      if (!posts.length) {
-        writeLog('❌ 포스팅 목록을 가져오지 못했습니다. 아이디를 확인하세요.', 'err');
-        document.getElementById('loading-overlay').classList.remove('show');
-        document.getElementById('analyzeBtn').disabled = false;
-        return;
-      }
+      writeLog(''); writeLog('[분석] 블로그뷰 노출 여부 확인 중...'); writeLog('');
 
-      writeLog('');
-      writeLog('[분석] 각 포스팅 블로그뷰 노출 여부 확인 중...');
-      writeLog('');
-
-      let exposedCnt = 0, missedCnt = 0;
-
-      // 테이블 미리 생성
+      let expCnt=0, missCnt=0;
       const table = document.createElement('table');
       table.innerHTML = `<thead><tr><th>#</th><th>포스팅 제목</th><th>작성일</th><th>블로그뷰 노출</th></tr></thead>`;
       const tbody = document.createElement('tbody');
@@ -466,46 +487,95 @@
       document.getElementById('resultArea').appendChild(table);
       document.getElementById('resultCount').textContent = posts.length;
 
-      for (let i = 0; i < posts.length; i++) {
-        const post  = posts[i];
-        const short = post.title.length > 26 ? post.title.slice(0,26) + '…' : post.title;
-        const idx   = String(i+1).padStart(2,'0');
-        writeLog(`[${idx}/${posts.length}] ${short}`);
-
-        const exposed = await checkExposure(post, blogId, clientId, clientSecret);
-        post.status = exposed ? '정상(블로그뷰)' : '누락';
-        if (exposed) { exposedCnt++; writeLog('  ✅ 노출 확인'); }
-        else         { missedCnt++;  writeLog('  ❌ 누락', 'err'); }
-
-        // 행 추가
+      for (let i=0; i<posts.length; i++) {
+        const post = posts[i];
+        writeLog(`[${String(i+1).padStart(2,'0')}/${posts.length}] ${post.title.length>26?post.title.slice(0,26)+'…':post.title}`);
+        const items = await searchBlog(post.title.slice(0,30), clientId, clientSecret);
+        let exposed = false;
+        for (const it of items) { const l=it.link||''; if (l.toLowerCase().includes(blogId.toLowerCase())||(post.logNo&&l.includes(post.logNo))) { exposed=true; break; } }
+        if (exposed) { expCnt++;  writeLog('  ✅ 노출 확인'); }
+        else         { missCnt++; writeLog('  ❌ 누락', 'err'); }
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="tn">${i+1}</td>
-          <td class="tt"><a href="${post.url}" target="_blank" title="${post.title}">${post.title}</a></td>
-          <td class="td-date">${post.pubDate || '-'}</td>
-          <td><span class="badge ${exposed ? 'bok' : 'bmiss'}">${exposed ? '✓ 노출' : '✗ 누락'}</span></td>`;
+        tr.innerHTML = `<td class="tn">${i+1}</td><td class="tt"><a href="${post.url}" target="_blank" title="${post.title}">${post.title}</a></td><td class="td-date">${post.pubDate||'-'}</td><td><span class="badge ${exposed?'bok':'bmiss'}">${exposed?'✓ 노출':'✗ 누락'}</span></td>`;
         tbody.appendChild(tr);
-
-        // 통계 실시간 갱신
-        const total = i + 1;
         document.getElementById('statTotal').textContent   = posts.length;
-        document.getElementById('statExposed').textContent = exposedCnt;
-        document.getElementById('statMissed').textContent  = missedCnt;
-        document.getElementById('statRate').textContent    = Math.round(exposedCnt / total * 100) + '%';
+        document.getElementById('statExposed').textContent = expCnt;
+        document.getElementById('statMissed').textContent  = missCnt;
+        document.getElementById('statRate').textContent    = Math.round(expCnt/(i+1)*100)+'%';
         document.getElementById('statsArea').style.display = 'flex';
       }
+      writeLog(''); writeLog('='.repeat(42),'sep');
+      writeLog(`  완료!  노출: ${expCnt}개  |  누락: ${missCnt}개`);
+      writeLog('='.repeat(42),'sep');
+    } catch(e) { writeLog('🚨 오류: '+e.message,'err'); }
+    hideLoading(); document.getElementById('analyzeBtn').disabled=false;
+  }
 
-      writeLog('');
-      writeLog('='.repeat(42), 'sep');
-      writeLog(`  완료!  노출: ${exposedCnt}개  |  누락: ${missedCnt}개`);
-      writeLog('='.repeat(42), 'sep');
+  // ══ 탭2: 키워드 순위 ══
+  async function startKeywordCheck() {
+    const blogId  = document.getElementById('kwBlogIdInput').value.trim();
+    const rawText = document.getElementById('kwInput').value.trim();
+    if (!blogId)  { alert('블로그 아이디를 입력하세요.'); return; }
+    if (!rawText) { alert('키워드를 입력하세요.'); return; }
+    const {clientId, clientSecret} = getConfig();
+    if (!clientId||!clientSecret) { alert('먼저 ⚙️ API 설정을 완료하세요.'); openApiModal(); return; }
 
-    } catch (e) {
-      writeLog('🚨 오류 발생: ' + e.message, 'err');
+    const keywords = rawText.split('\n').map(k=>k.trim()).filter(k=>k).slice(0,20);
+    showLoading(`키워드 ${keywords.length}개 순위 확인 중...`, '키워드 수에 따라 시간이 걸릴 수 있습니다');
+    document.getElementById('kwBtn').disabled = true;
+    document.getElementById('kwResults').innerHTML = '';
+
+    for (let ki=0; ki<keywords.length; ki++) {
+      const kw = keywords[ki];
+      document.getElementById('ldText').textContent = `[${ki+1}/${keywords.length}] "${kw}" 확인 중...`;
+
+      try {
+        const items = await searchBlog(kw, clientId, clientSecret);
+        let myRank=0, myItem=null;
+        for (let i=0; i<items.length; i++) {
+          if ((items[i].link||'').toLowerCase().includes(blogId.toLowerCase())) { myRank=i+1; myItem=items[i]; break; }
+        }
+
+        const top5 = items.slice(0,5).map((it,idx) => {
+          const isMine = (it.link||'').toLowerCase().includes(blogId.toLowerCase());
+          const title  = (it.title||it.link||'').replace(/<[^>]+>/g,'');
+          return `<div class="kw-item">
+            <span class="kw-item-num">${idx+1}위</span>
+            <div class="kw-item-info">
+              <a href="${it.link}" target="_blank">${title}</a>
+              ${it.bloggername ? `<div class="kw-item-blogger">@${it.bloggername}</div>` : ''}
+            </div>
+            ${isMine ? '<span class="kw-mine-tag">⭐ 내 글</span>' : ''}
+          </div>`;
+        }).join('');
+
+        const card = document.createElement('div');
+        card.className = 'kw-card';
+        card.innerHTML = `
+          <div class="kw-card-header">
+            <div>
+              <div class="kw-card-title">🔑 ${kw}</div>
+              <div class="kw-card-sub">네이버 블로그 검색 기준 · 상위 100위</div>
+            </div>
+            <div class="kw-rank ${myRank>0?'found':'not-found'}">${myRank>0?myRank+'위':'100위 밖'}</div>
+          </div>
+          <div class="kw-card-body">
+            <div class="kw-my-result ${myRank>0?'found':'not-found'}">
+              <div class="kw-my-label ${myRank>0?'found':'not-found'}">${myRank>0?`✅ 내 블로그 ${myRank}위에 노출 중`:'❌ 이 키워드에서 내 블로그가 100위 안에 없습니다'}</div>
+              ${myRank>0&&myItem?`<div class="kw-my-post-title"><a href="${myItem.link}" target="_blank">${(myItem.title||myItem.link).replace(/<[^>]+>/g,'')}</a></div>`:''}
+            </div>
+            <div class="kw-top-label">상위 5개 검색 결과</div>
+            ${top5}
+          </div>`;
+        document.getElementById('kwResults').appendChild(card);
+      } catch(e) {
+        const card = document.createElement('div');
+        card.className = 'kw-card';
+        card.innerHTML = `<div class="kw-card-header"><div class="kw-card-title">🔑 ${kw}</div><div style="color:var(--red);font-size:12px">오류 발생</div></div>`;
+        document.getElementById('kwResults').appendChild(card);
+      }
     }
-
-    document.getElementById('loading-overlay').classList.remove('show');
-    document.getElementById('analyzeBtn').disabled = false;
+    hideLoading(); document.getElementById('kwBtn').disabled=false;
   }
 </script>
 </body>
