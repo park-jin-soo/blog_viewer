@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>블로그뷰 노출 분석기</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0f14; --surface: #161a24; --surface2: #1e2433;
+      --border: #2a3045;
+      --green: #00e676; --green-dim: #0d2e1c;
+      --red: #ff5252;   --red-dim: #2e0d0d;
+      --yellow: #ffd740; --blue: #40c4ff;
+      --text: #e8eaf6;  --text-dim: #78849e;
+      --mono: 'JetBrains Mono', monospace;
+      --ko:   'Noto Sans KR', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--ko); min-height: 100vh; padding: 32px 24px; }
+    .wrap { max-width: 1280px; margin: 0 auto; }
+
+    /* 헤더 */
+    .hd {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px; padding-bottom: 22px; border-bottom: 1px solid var(--border);
+    }
+    .hd-left { display: flex; align-items: center; gap: 14px; }
+    .hd-icon { width: 46px; height: 46px; background: var(--green); border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .hd h1  { font-size: 20px; font-weight: 900; letter-spacing: -.5px; }
+    .hd p   { color: var(--text-dim); font-size: 12px; margin-top: 4px; }
+
+    /* 설정 버튼 */
+    .settings-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text-dim); border-radius: 9px; padding: 10px 16px;
+      font-size: 13px; font-family: var(--ko); cursor: pointer; transition: all .2s;
+    }
+    .settings-btn:hover { border-color: var(--green); color: var(--green); }
+    .api-status { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 2px; }
+    .api-ok   { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .api-none { background: var(--red); }
+
+    /* 모달 */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.7); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 32px; width: 480px; max-width: 95vw;
+    }
+    .modal h2 { font-size: 17px; font-weight: 900; margin-bottom: 6px; }
+    .modal p  { color: var(--text-dim); font-size: 12px; margin-bottom: 24px; line-height: 1.6; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field label { display: block; font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+    .modal-input {
+      width: 100%; background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 11px 14px; color: var(--text);
+      font-family: var(--mono); font-size: 13px; outline: none; transition: border-color .2s;
+    }
+    .modal-input:focus { border-color: var(--green); }
+    .modal-btns { display: flex; gap: 10px; margin-top: 24px; }
+    .modal-save {
+      flex: 1; background: var(--green); color: #000; border: none;
+      border-radius: 8px; padding: 12px; font-weight: 700;
+      font-size: 14px; font-family: var(--ko); cursor: pointer;
+    }
+    .modal-save:hover { opacity: .85; }
+    .modal-cancel {
+      background: var(--surface2); color: var(--text-dim);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 20px; font-size: 14px; font-family: var(--ko); cursor: pointer;
+    }
+    .modal-cancel:hover { border-color: var(--text-dim); }
+    .save-msg { display:none; color: var(--green); font-size: 12px; margin-top: 10px; text-align: center; }
+
+    /* 폼 */
+    .form { display: flex; gap: 10px; margin-bottom: 16px; }
+    .inp {
+      flex: 1; background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 13px 18px; color: var(--text);
+      font-size: 15px; font-family: var(--ko); outline: none; transition: border-color .2s;
+    }
+    .inp:focus { border-color: var(--green); }
+    .inp::placeholder { color: var(--text-dim); }
+    .btn {
+      background: var(--green); color: #000; border: none;
+      border-radius: 10px; padding: 13px 28px; font-weight: 700;
+      font-size: 15px; font-family: var(--ko); cursor: pointer;
+    }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* 안내 배너 */
+    .notice-banner {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: #0d1f2e; border: 1px solid #1a4a6e;
+      border-left: 4px solid var(--blue);
+      border-radius: 10px; padding: 14px 18px;
+      margin-bottom: 20px; font-size: 13px; line-height: 1.7;
+    }
+    .notice-banner .nb-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .notice-banner .nb-title { color: var(--blue); font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+    .notice-banner .nb-body  { color: #8ec8f0; font-size: 12px; }
+    .notice-banner .nb-body strong { color: var(--blue); }
+
+    /* 통계 카드 */
+    .stats { display: flex; gap: 14px; margin-bottom: 22px; }
+    .sc { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; }
+    .sc-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .8px; }
+    .sc-val   { font-size: 28px; font-weight: 900; margin-top: 4px; font-family: var(--mono); }
+    .c-blue  { color: var(--blue); }
+    .c-green { color: var(--green); }
+    .c-red   { color: var(--red); }
+    .c-yellow{ color: var(--yellow); }
+
+    /* 그리드 */
+    .grid { display: grid; grid-template-columns: 360px 1fr; gap: 18px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+    /* 패널 */
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 13px; overflow: hidden; }
+    .ph {
+      padding: 12px 18px; border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      color: var(--text-dim); text-transform: uppercase;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dg { background: var(--green); }
+    .db { background: var(--blue); }
+
+    /* 콘솔 */
+    .console {
+      background: #06080d; font-family: var(--mono); font-size: 11.5px;
+      line-height: 1.8; height: 520px; overflow-y: auto; padding: 14px 18px;
+    }
+    .console::-webkit-scrollbar { width: 3px; }
+    .console::-webkit-scrollbar-thumb { background: var(--border); }
+    .ll      { color: var(--green); }
+    .ll.warn { color: var(--yellow); }
+    .ll.err  { color: var(--red); }
+    .ll.sep  { color: #283040; }
+    .lempty  { color: #283040; font-style: italic; }
+
+    /* 테이블 */
+    .rs { height: 520px; overflow-y: auto; }
+    .rs::-webkit-scrollbar { width: 3px; }
+    .rs::-webkit-scrollbar-thumb { background: var(--border); }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 11px 14px; text-align: left; font-size: 10px;
+      font-weight: 700; letter-spacing: .8px; color: var(--text-dim);
+      text-transform: uppercase; background: var(--surface2);
+      position: sticky; top: 0; z-index: 1;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+    tbody tr:hover { background: var(--surface2); }
+    td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
+    .tn { color: var(--text-dim); font-family: var(--mono); font-size: 10px; width: 36px; }
+    .td-date { color: var(--text-dim); font-family: var(--mono); font-size: 11px; white-space: nowrap; }
+    .tt a {
+      color: var(--text); text-decoration: none; font-weight: 500;
+      display: block; white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis; max-width: 380px;
+    }
+    .tt a:hover { color: var(--green); }
+
+    /* 배지 */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 5px; font-size: 11px; font-weight: 700; }
+    .bok   { background: var(--green-dim); color: var(--green); }
+    .bmiss { background: var(--red-dim);   color: var(--red);   }
+
+    .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: var(--text-dim); font-size: 13px; gap: 8px; }
+
+    /* 로딩 오버레이 */
+    #loading-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(13,15,20,.88); z-index: 200;
+      flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+    }
+    #loading-overlay.show { display: flex; }
+    .ld-dots { display: flex; gap: 10px; }
+    .ld-dots span {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--green);
+      animation: ld-bounce 1.2s infinite ease-in-out;
+    }
+    .ld-dots span:nth-child(1) { animation-delay: 0s; }
+    .ld-dots span:nth-child(2) { animation-delay: .2s; }
+    .ld-dots span:nth-child(3) { animation-delay: .4s; }
+    .ld-dots span:nth-child(4) { animation-delay: .6s; }
+    .ld-dots span:nth-child(5) { animation-delay: .8s; }
+    @keyframes ld-bounce {
+      0%, 80%, 100% { transform: scale(0.5); opacity: .3; }
+      40%            { transform: scale(1.2); opacity: 1;  }
+    }
+    .ld-text { color: var(--text); font-size: 15px; font-weight: 700; letter-spacing: -.3px; }
+    .ld-sub  { color: var(--text-dim); font-size: 12px; margin-top: -10px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 헤더 -->
+  <div class="hd">
+    <div class="hd-left">
+      <div class="hd-icon">🔎</div>
+      <div>
+        <h1>블로그뷰 노출 분석기</h1>
+        <p>네이버 검색 API로 블로그뷰 노출 여부를 빠르게 확인합니다</p>
+      </div>
+    </div>
+    <button class="settings-btn" onclick="openModal()">
+      <span class="api-status" id="apiDot"></span>
+      ⚙️ API 설정
+      <span id="apiStatusLabel" style="font-size:11px"></span>
+    </button>
+  </div>
+
+  <!-- 검색 폼 -->
+  <div class="form">
+    <input id="blogIdInput" class="inp" placeholder="네이버 블로그 아이디 입력 (예: brain_1018)">
+    <button class="btn" id="analyzeBtn" onclick="startAnalysis()">분석 시작</button>
+  </div>
+
+  <!-- 안내 배너 -->
+  <div class="notice-banner">
+    <div class="nb-icon">ℹ️</div>
+    <div>
+      <div class="nb-title">노출 / 누락 판단 기준 안내</div>
+      <div class="nb-body">
+        포스팅 제목으로 네이버 블로그 검색 시 <strong>상위 100위 이내</strong>에 해당 포스팅이 존재하면 <strong>✓ 노출</strong>,
+        100위 밖이거나 검색되지 않으면 <strong>✗ 누락</strong>으로 표시됩니다.<br>
+        검색 API 기준이므로 실제 블로그뷰 노출과 다소 차이가 있을 수 있습니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 통계 카드 -->
+  <div class="stats" id="statsArea" style="display:none">
+    <div class="sc"><div class="sc-label">전체 포스팅</div><div class="sc-val c-blue" id="statTotal">0</div></div>
+    <div class="sc"><div class="sc-label">블로그뷰 노출</div><div class="sc-val c-green" id="statExposed">0</div></div>
+    <div class="sc"><div class="sc-label">누락</div><div class="sc-val c-red" id="statMissed">0</div></div>
+    <div class="sc"><div class="sc-label">노출률</div><div class="sc-val c-yellow" id="statRate">0%</div></div>
+  </div>
+
+  <!-- 2컬럼 -->
+  <div class="grid">
+    <!-- 로그 -->
+    <div class="panel">
+      <div class="ph"><span class="dot dg"></span>처리 로그</div>
+      <div class="console" id="console">
+        <div class="lempty">아이디를 입력하고 분석을 시작하세요.</div>
+      </div>
+    </div>
+
+    <!-- 결과 테이블 -->
+    <div class="panel">
+      <div class="ph"><span class="dot db"></span>분석 결과 (<span id="resultCount">0</span>개)</div>
+      <div class="rs" id="resultArea">
+        <div class="empty">
+          <span style="font-size:32px">📭</span>
+          <span id="emptyMsg">먼저 ⚙️ API 설정을 완료하세요</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 로딩 오버레이 -->
+<div id="loading-overlay">
+  <div class="ld-dots">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+  <div class="ld-text">분석 중입니다...</div>
+  <div class="ld-sub">포스팅 수에 따라 다소 시간이 걸릴 수 있습니다</div>
+</div>
+
+<!-- 설정 모달 -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>⚙️ 네이버 API 설정</h2>
+    <p>
+      네이버 개발자 센터에서 발급받은 API 키를 입력하세요.<br>
+      한 번 저장하면 브라우저를 닫아도 유지됩니다.<br>
+      <a href="https://developers.naver.com/apps" target="_blank" style="color:var(--blue);font-size:11px">
+        👉 https://developers.naver.com/apps
+      </a>
+    </p>
+    <div class="modal-field">
+      <label>Client ID</label>
+      <input type="text" id="clientId" class="modal-input" placeholder="Client ID 입력">
+    </div>
+    <div class="modal-field">
+      <label>Client Secret</label>
+      <input type="password" id="clientSecret" class="modal-input" placeholder="Client Secret 입력">
+    </div>
+    <div class="modal-btns">
+      <button class="modal-save" onclick="saveConfig()">💾 저장</button>
+      <button class="modal-cancel" onclick="closeModal()">취소</button>
+    </div>
+    <div class="save-msg" id="saveMsg">✅ 저장 완료! API 키가 브라우저에 안전하게 저장되었습니다.</div>
+  </div>
+</div>
+
+<script>
+  // ── 설정 ──────────────────────────────────────
+  const PROXY = 'https://billowing-fog-1eed.woodpano.workers.dev';
+
+  // ── localStorage API 키 ───────────────────────
+  function getConfig() {
+    return {
+      clientId:     localStorage.getItem('naver_client_id')     || '',
+      clientSecret: localStorage.getItem('naver_client_secret') || '',
+    };
+  }
+  function updateApiStatus() {
+    const { clientId, clientSecret } = getConfig();
+    const ok = !!(clientId && clientSecret);
+    const dot   = document.getElementById('apiDot');
+    const label = document.getElementById('apiStatusLabel');
+    const emptyMsg = document.getElementById('emptyMsg');
+    dot.className   = 'api-status ' + (ok ? 'api-ok' : 'api-none');
+    label.textContent = ok ? '저장됨' : '미설정';
+    label.style.color = ok ? 'var(--green)' : 'var(--red)';
+    emptyMsg.textContent = ok ? '분석 결과가 없습니다' : '먼저 ⚙️ API 설정을 완료하세요';
+    if (clientId) document.getElementById('clientId').value = clientId;
+    if (clientSecret) document.getElementById('clientSecret').value = clientSecret;
+  }
+  updateApiStatus();
+
+  // ── 모달 ──────────────────────────────────────
+  function openModal()  { document.getElementById('modal').classList.add('open'); }
+  function closeModal() { document.getElementById('modal').classList.remove('open'); }
+  document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+  function saveConfig() {
+    const id     = document.getElementById('clientId').value.trim();
+    const secret = document.getElementById('clientSecret').value.trim();
+    if (!id || !secret) { alert('Client ID와 Client Secret을 모두 입력해주세요.'); return; }
+    localStorage.setItem('naver_client_id', id);
+    localStorage.setItem('naver_client_secret', secret);
+    document.getElementById('saveMsg').style.display = 'block';
+    setTimeout(() => { closeModal(); document.getElementById('saveMsg').style.display = 'none'; updateApiStatus(); }, 1200);
+  }
+
+  // ── 로그 ──────────────────────────────────────
+  let logs = [];
+  function writeLog(msg, type = '') {
+    logs.push({ msg, type });
+    const con = document.getElementById('console');
+    const div = document.createElement('div');
+    div.className = 'll' + (type ? ' ' + type : '');
+    div.textContent = '>>> ' + msg;
+    if (logs.length === 1) con.innerHTML = '';
+    con.appendChild(div);
+    con.scrollTop = con.scrollHeight;
+  }
+  function clearLog() {
+    logs = [];
+    document.getElementById('console').innerHTML = '';
+  }
+
+  // ── RSS 파싱 ──────────────────────────────────
+  async function fetchRSS(blogId) {
+    const res  = await fetch(`${PROXY}/rss?blog_id=${blogId}`);
+    const text = await res.text();
+    const parser = new DOMParser();
+    const xml    = parser.parseFromString(text, 'application/xml');
+    const items  = xml.querySelectorAll('item');
+    const posts  = [];
+    items.forEach(item => {
+      const title   = item.querySelector('title')?.textContent?.trim() || '';
+      const link    = item.querySelector('link')?.textContent?.trim() || '';
+      const pubDate = item.querySelector('pubDate')?.textContent?.trim() || '';
+
+      let logNo = '';
+      if (link.includes('logNo=')) {
+        logNo = link.split('logNo=')[1].split('&')[0];
+      } else {
+        const parts = link.replace(/\/$/, '').split('/');
+        logNo = parts[parts.length - 1].split('?')[0];
+      }
+
+      let dateStr = '';
+      if (pubDate) {
+        try {
+          const d = new Date(pubDate);
+          dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+        } catch { dateStr = pubDate.slice(0,10); }
+      }
+
+      if (title && link) posts.push({ title, url: link, logNo, pubDate: dateStr, status: '확인 중' });
+    });
+    return posts;
+  }
+
+  // ── 검색 API ─────────────────────────────────
+  async function checkExposure(post, blogId, clientId, clientSecret) {
+    const keyword = post.title.slice(0, 30);
+    const res = await fetch(`${PROXY}/search?query=${encodeURIComponent(keyword)}`, {
+      headers: {
+        'X-Client-Id':     clientId,
+        'X-Client-Secret': clientSecret,
+      }
+    });
+    if (!res.ok) return false;
+    const data  = await res.json();
+    const items = data.items || [];
+    for (const item of items) {
+      const link = item.link || '';
+      if (link.toLowerCase().includes(blogId.toLowerCase())) return true;
+      if (post.logNo && link.includes(post.logNo)) return true;
+    }
+    return false;
+  }
+
+  // ── 분석 메인 ────────────────────────────────
+  async function startAnalysis() {
+    const blogId = document.getElementById('blogIdInput').value.trim();
+    if (!blogId) { alert('블로그 아이디를 입력하세요.'); return; }
+
+    const { clientId, clientSecret } = getConfig();
+    if (!clientId || !clientSecret) { alert('먼저 ⚙️ API 설정을 완료하세요.'); openModal(); return; }
+
+    // 로딩 시작
+    document.getElementById('loading-overlay').classList.add('show');
+    document.getElementById('analyzeBtn').disabled = true;
+    document.getElementById('statsArea').style.display = 'none';
+    document.getElementById('resultArea').innerHTML = '';
+    document.getElementById('resultCount').textContent = '0';
+    clearLog();
+
+    try {
+      writeLog('='.repeat(42), 'sep');
+      writeLog(`  블로그 분석 시작: '${blogId}'`);
+      writeLog('='.repeat(42), 'sep');
+      writeLog(`[RSS] 접속 중 → https://rss.blog.naver.com/${blogId}.xml`);
+
+      const posts = await fetchRSS(blogId);
+      writeLog(`[RSS] 총 ${posts.length}개 포스팅 발견`);
+
+      if (!posts.length) {
+        writeLog('❌ 포스팅 목록을 가져오지 못했습니다. 아이디를 확인하세요.', 'err');
+        document.getElementById('loading-overlay').classList.remove('show');
+        document.getElementById('analyzeBtn').disabled = false;
+        return;
+      }
+
+      writeLog('');
+      writeLog('[분석] 각 포스팅 블로그뷰 노출 여부 확인 중...');
+      writeLog('');
+
+      let exposedCnt = 0, missedCnt = 0;
+
+      // 테이블 미리 생성
+      const table = document.createElement('table');
+      table.innerHTML = `<thead><tr><th>#</th><th>포스팅 제목</th><th>작성일</th><th>블로그뷰 노출</th></tr></thead>`;
+      const tbody = document.createElement('tbody');
+      table.appendChild(tbody);
+      document.getElementById('resultArea').appendChild(table);
+      document.getElementById('resultCount').textContent = posts.length;
+
+      for (let i = 0; i < posts.length; i++) {
+        const post  = posts[i];
+        const short = post.title.length > 26 ? post.title.slice(0,26) + '…' : post.title;
+        const idx   = String(i+1).padStart(2,'0');
+        writeLog(`[${idx}/${posts.length}] ${short}`);
+
+        const exposed = await checkExposure(post, blogId, clientId, clientSecret);
+        post.status = exposed ? '정상(블로그뷰)' : '누락';
+        if (exposed) { exposedCnt++; writeLog('  ✅ 노출 확인'); }
+        else         { missedCnt++;  writeLog('  ❌ 누락', 'err'); }
+
+        // 행 추가
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="tn">${i+1}</td>
+          <td class="tt"><a href="${post.url}" target="_blank" title="${post.title}">${post.title}</a></td>
+          <td class="td-date">${post.pubDate || '-'}</td>
+          <td><span class="badge ${exposed ? 'bok' : 'bmiss'}">${exposed ? '✓ 노출' : '✗ 누락'}</span></td>`;
+        tbody.appendChild(tr);
+
+        // 통계 실시간 갱신
+        const total = i + 1;
+        document.getElementById('statTotal').textContent   = posts.length;
+        document.getElementById('statExposed').textContent = exposedCnt;
+        document.getElementById('statMissed').textContent  = missedCnt;
+        document.getElementById('statRate').textContent    = Math.round(exposedCnt / total * 100) + '%';
+        document.getElementById('statsArea').style.display = 'flex';
+      }
+
+      writeLog('');
+      writeLog('='.repeat(42), 'sep');
+      writeLog(`  완료!  노출: ${exposedCnt}개  |  누락: ${missedCnt}개`);
+      writeLog('='.repeat(42), 'sep');
+
+    } catch (e) {
+      writeLog('🚨 오류 발생: ' + e.message, 'err');
+    }
+
+    document.getElementById('loading-overlay').classList.remove('show');
+    document.getElementById('analyzeBtn').disabled = false;
+  }
+</script>
+</body>
+</html>
