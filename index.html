@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>블로그뷰 노출 분석기</title>
+  <title>채우미 블로그 노출/누락 분석기</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -182,8 +182,8 @@
     <div class="hd-left">
       <div class="hd-icon">🔎</div>
       <div>
-        <h1>블로그뷰 노출 분석기</h1>
-        <p>네이버 검색 API로 블로그뷰 노출 여부와 키워드 순위를 확인합니다</p>
+        <h1>채우미 블로그 노출/누락 분석기</h1>
+        <p>블로그뷰 노출 여부와 키워드 순위를 빠르게 확인합니다</p>
       </div>
     </div>
     <div class="hd-btns">
@@ -196,6 +196,48 @@
       </button>
     </div>
   </div>
+
+
+  <!-- 소통방 배너 -->
+  <a href="https://open.kakao.com/o/g0BjbBQh" target="_blank" style="display:block;text-decoration:none;margin-bottom:20px;">
+    <div style="
+      background: linear-gradient(135deg, #1a1a2e 0%, #0d2e1c 100%);
+      border: 1px solid var(--green);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      transition: all .2s;
+      cursor: pointer;
+    " onmouseover="this.style.borderColor='#00ff88';this.style.boxShadow='0 0 16px rgba(0,230,118,.2)'" onmouseout="this.style.borderColor='var(--green)';this.style.boxShadow='none'">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:26px;">💬</span>
+        <div>
+          <div style="font-size:14px;font-weight:900;color:var(--green);letter-spacing:-.3px;">더 많은 자동화 프로그램과 블로그 품앗이를 하며 소통하실 분들은</div>
+          <div style="font-size:12px;color:#8ec8f0;margin-top:3px;">소통방에서 같이 블로그 생활 즐겨요!! 🙌</div>
+        </div>
+      </div>
+      <div style="
+        background:#FEE500;color:#000;
+        border-radius:12px;padding:8px 16px;
+        font-size:13px;font-weight:900;
+        white-space:nowrap;flex-shrink:0;
+        display:flex;align-items:center;gap:7px;
+      ">
+        <svg width="20" height="20" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="20" cy="17" rx="17" ry="14" fill="#3A1D1D"/>
+          <ellipse cx="20" cy="17" rx="14" ry="11.5" fill="#3A1D1D"/>
+          <path d="M20 7C11.716 7 5 12.149 5 18.5c0 4.08 2.69 7.663 6.75 9.74L10 33l5.53-3.31C16.97 29.88 18.46 30 20 30c8.284 0 15-5.149 15-11.5S28.284 7 20 7z" fill="#FEE500"/>
+          <circle cx="13.5" cy="18.5" r="2" fill="#3A1D1D"/>
+          <circle cx="20" cy="18.5" r="2" fill="#3A1D1D"/>
+          <circle cx="26.5" cy="18.5" r="2" fill="#3A1D1D"/>
+        </svg>
+        소통방 입장
+      </div>
+    </div>
+  </a>
 
   <!-- 탭 -->
   <div class="tabs">
@@ -214,7 +256,7 @@
       <div class="nb-icon">ℹ️</div>
       <div>
         <div class="nb-title">노출 / 누락 판단 기준 안내</div>
-        <div class="nb-body">포스팅 제목으로 네이버 블로그 검색 시 <strong>상위 100위 이내</strong>에 존재하면 <strong>✓ 노출</strong>, 없으면 <strong>✗ 누락</strong>으로 표시됩니다. 검색 API 기준이므로 실제 블로그뷰와 다소 차이가 있을 수 있습니다.</div>
+        <div class="nb-body">포스팅 제목으로 네이버 블로그 검색 시 <strong>상위 100위 이내</strong>에 존재하면 <strong>✓ 노출</strong>, 없으면 <strong>✗ 누락</strong>으로 표시됩니다. 실제 블로그뷰 결과와 다소 차이가 있을 수 있습니다.</div>
       </div>
     </div>
 
@@ -318,7 +360,7 @@
 
     <div class="guide-tip">
       💡 <strong>참고사항</strong><br>
-      • 네이버 검색 API는 <strong>하루 25,000건</strong> 무료로 제공됩니다.<br>
+      • API 호출은 <strong>하루 25,000건</strong> 무료로 제공됩니다.<br>
       • API 키는 본인 브라우저에만 저장되며 외부로 전송되지 않습니다.<br>
       • 등록 후 바로 사용 가능합니다. (심사 불필요)
     </div>
